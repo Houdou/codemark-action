@@ -1,0 +1,25 @@
+name: 'Code Mark'
+description: 'Find all code marks'
+inputs:
+  directory:
+    description: 'directory to scan'
+    required: true
+    default: '.'
+  pattern:
+    description: 'matching pattern'
+    required: true
+    default: '\/\/\s*\[\w+\](.+)'
+  includes:
+    description: 'files to scan'
+    required: false
+    default: '\.(go|js|ts|py)$'
+  excludes:
+    description: 'extra excludes from includes list'
+    required: false
+    default: '(\.gen\.go|_test.go|\.(spec|test)\.(js|ts))$'
+outputs:
+  marks:
+    description: 'found marks'
+runs:
+  using: 'node20'
+  main: 'index.js'
