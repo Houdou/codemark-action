@@ -5,7 +5,15 @@ const path = require('path');
 
 const core = require('@actions/core');
 
-function scanDirectory({directory, pattern, includes, excludes}) {
+const FoldersToIgnore = [
+    'node_modules',
+    'dist',
+    'build',
+    '.git',
+    '.github'
+];
+
+function scanDirectory({directory, pattern, includes, excludes, gitignores}) {
     const matches = [];
 
     const files = fs.readdirSync(directory);
@@ -13,11 +21,16 @@ function scanDirectory({directory, pattern, includes, excludes}) {
         const filePath = path.join(directory, file);
         const stat = fs.statSync(filePath);
         if (stat.isDirectory()) {
+            if(gitignores.includes(file)) {
+                continue;
+            }
+
             const inner_matches = scanDirectory({
                 directory: filePath,
                 pattern,
                 includes,
-                excludes
+                excludes,
+                gitignores
             });
             inner_matches.forEach(match => matches.push(match));
         } else if (stat.isFile()) {
@@ -51,11 +64,17 @@ try {
     const excludes = core.getInput('excludes');
     const EXCLUDE_PATTERN = excludes && new RegExp(excludes);
 
+    const gitignores =
+        fs.existsSync(path.join(directory, '.gitignore'))
+            ? fs.readFileSync(path.join(directory, '.gitignore'), 'utf-8').split('\n')
+            : FoldersToIgnore;
+
     const matches = scanDirectory({
         directory,
         pattern: REGEX_PATTERN,
         includes: INCLUDE_PATTERN,
-        excludes: EXCLUDE_PATTERN
+        excludes: EXCLUDE_PATTERN,
+        gitignores
     });
 
     if (matches.length > 0) {
