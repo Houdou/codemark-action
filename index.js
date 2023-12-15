@@ -42,7 +42,7 @@ function scanDirectory({directory, pattern, includes, excludes, gitignores}) {
                         matches.push({
                             filePath,
                             line,
-                            matches: matches.splice(1, 3)
+                            matches: match.splice(1, 3)
                         });
                     }
                 });
