@@ -18,15 +18,15 @@ function scanDirectory({directory, pattern, includes, excludes, gitignores}) {
 
     const files = fs.readdirSync(directory);
     for (const file of files) {
-        const filePath = path.join(directory, file);
-        const stat = fs.statSync(filePath);
+        const file_path = path.join(directory, file);
+        const stat = fs.statSync(file_path);
         if (stat.isDirectory()) {
             if(gitignores.includes(file)) {
                 continue;
             }
 
             const inner_matches = scanDirectory({
-                directory: filePath,
+                directory: file_path,
                 pattern,
                 includes,
                 excludes,
@@ -35,13 +35,14 @@ function scanDirectory({directory, pattern, includes, excludes, gitignores}) {
             inner_matches.forEach(match => matches.push(match));
         } else if (stat.isFile()) {
             if (includes && includes.test(file) && (!excludes || excludes && !excludes.test(file))) {
-                const lines = fs.readFileSync(filePath, 'utf-8').split('\n');
+                const lines = fs.readFileSync(file_path, 'utf-8').split('\n');
                 lines.forEach((line, index) => {
                     const match = line.match(pattern);
                     if (match) {
                         matches.push({
-                            filePath,
+                            file_path,
                             line,
+                            line_number: index + 1,
                             matches: match.splice(1, 3)
                         });
                     }
